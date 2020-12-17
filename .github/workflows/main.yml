@@ -1,0 +1,36 @@
+name: build-test
+
+on:
+  push:
+#    tags:
+#      - "v*"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+          - msystem: MINGW64
+            arch: x86_64
+          - msystem: MINGW32
+            arch: i686
+    steps:
+      - uses: actions/checkout@v2
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.msystem }}
+          install: base make mingw-w64-${{ matrix.arch }}-clang mingw-w64-${{ matrix.arch }}-cmake  mingw-w64-${{ matrix.arch }}-ninja
+          update: true
+      - name: CI-Build
+        shell: msys2 {0}
+        run: |
+          mkdir build
+          cd build
+          CC=clang cmake -GNinja -DCMAKE_BUILD_TYPE=Release ..
+          ninja
+      - name: "Upload binaries"
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.msystem }}-bin
+          path: build/clicker.exe
