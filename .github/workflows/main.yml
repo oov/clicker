@@ -21,7 +21,6 @@ jobs:
         with:
           msystem: ${{ matrix.msystem }}
           install: base make mingw-w64-${{ matrix.arch }}-clang mingw-w64-${{ matrix.arch }}-cmake  mingw-w64-${{ matrix.arch }}-ninja
-          update: true
       - name: CI-Build
         shell: msys2 {0}
         run: |
