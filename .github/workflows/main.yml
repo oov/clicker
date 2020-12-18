@@ -50,10 +50,10 @@ jobs:
         uses: actions/download-artifact@v2
       - name: Zip 1
         run: |
-          cd MINGW64-bin && zip ..\clicker-${{ steps.get_version.outputs.tag }}-amd64.zip * && cd ..
+          cd MINGW64-bin && zip clicker-${{ steps.get_version.outputs.tag }}-amd64.zip * && cd ..
       - name: Zip 2
         run: |
-          cd MINGW32-bin && zip ..\clicker-${{ steps.get_version.outputs.tag }}-x86.zip * && cd ..
+          cd MINGW32-bin && zip clicker-${{ steps.get_version.outputs.tag }}-x86.zip * && cd ..
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -74,7 +74,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./clicker-${{ steps.get_version.outputs.tag }}-amd64.zip
+          asset_path: ./MINGW64-bin/clicker-${{ steps.get_version.outputs.tag }}-amd64.zip
           asset_name: clicker-${{ steps.get_version.outputs.tag }}-amd64.zip
           asset_content_type: application/zip
       - name: Upload Release Asset 2
@@ -84,6 +84,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./clicker-${{ steps.get_version.outputs.tag }}-x86.zip
+          asset_path: ./MINGW32-bin/clicker-${{ steps.get_version.outputs.tag }}-x86.zip
           asset_name: clicker-${{ steps.get_version.outputs.tag }}-x86.zip
           asset_content_type: application/zip
