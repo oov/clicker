@@ -1,4 +1,4 @@
-name: build-test
+name: release
 
 on:
   push:
@@ -21,15 +21,57 @@ jobs:
         with:
           msystem: ${{ matrix.msystem }}
           install: make mingw-w64-${{ matrix.arch }}-clang mingw-w64-${{ matrix.arch }}-cmake mingw-w64-${{ matrix.arch }}-ninja
-      - name: CI-Build
+      - name: Run ninja
         shell: msys2 {0}
         run: |
           mkdir build
           cd build
           CC=clang cmake -GNinja -DCMAKE_BUILD_TYPE=Release ..
           ninja
-      - name: "Upload binaries"
+      - name: Upload binaries
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.msystem }}-bin
-          path: build/clicker.exe
+          path: |
+            README.md
+            build/clicker.exe
+  create-release:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+      - name: Zip
+        run: |
+          cd MINGW64-bin && zip ..\clicker-${{ github.ref }}-amd64.zip * && cd ..
+          cd MINGW32-bin && zip ..\clicker-${{ github.ref }}-x86.zip * && cd ..
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset 1
+        id: upload-release-asset1
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./clicker-${{ github.ref }}-amd64.zip
+          asset_name: clicker-${{ github.ref }}-amd64.zip
+          asset_content_type: application/zip
+      - name: Upload Release Asset 2
+        id: upload-release-asset2
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./clicker-${{ github.ref }}-x86.zip
+          asset_name: clicker-${{ github.ref }}-x86.zip
+          asset_content_type: application/zip
