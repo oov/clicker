@@ -28,12 +28,16 @@ jobs:
           cd build
           CC=clang cmake -GNinja -DCMAKE_BUILD_TYPE=Release ..
           ninja
+      - name: Copy README.md
+        shell: msys2 {0}
+        run: |
+          cp README.md build/
       - name: Upload binaries
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.msystem }}-bin
           path: |
-            README.md
+            build/README.md
             build/clicker.exe
   create-release:
     needs: [build]
@@ -44,9 +48,11 @@ jobs:
         run: echo ::set-output name=tag::${GITHUB_REF/refs\/tags\//}
       - name: Download artifacts
         uses: actions/download-artifact@v2
-      - name: Zip
+      - name: Zip 1
         run: |
           cd MINGW64-bin && zip ..\clicker-${{ steps.get_version.outputs.tag }}-amd64.zip * && cd ..
+      - name: Zip 2
+        run: |
           cd MINGW32-bin && zip ..\clicker-${{ steps.get_version.outputs.tag }}-x86.zip * && cd ..
       - name: Create Release
         id: create_release
@@ -56,8 +62,11 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
-          draft: false
+          draft: true
           prerelease: false
+      - name: Zip 1
+        run: |
+          ls -R
       - name: Upload Release Asset 1
         id: upload-release-asset1
         uses: actions/upload-release-asset@v1
