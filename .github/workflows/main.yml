@@ -1,4 +1,4 @@
-name: release
+name: releaser
 
 on:
   push:
@@ -64,9 +64,6 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: true
           prerelease: false
-      - name: Zip 1
-        run: |
-          ls -R
       - name: Upload Release Asset 1
         id: upload-release-asset1
         uses: actions/upload-release-asset@v1
